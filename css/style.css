@@ -1,0 +1,20 @@
+body {
+  background: #ffcc80;
+  height: 100vh;
+  padding: 2%;
+  font-family: sans-serif;
+  display: block;
+}
+
+.construction {
+  display: block;
+  margin: 0 auto;
+}
+
+.btn {
+  color: white;
+  background: #ff6a00;
+  border: none;
+  border-radius: 2px;
+  padding: 16px;
+}
