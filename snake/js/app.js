@@ -62,3 +62,27 @@ function moveOutcomes() {
 
   squares[currentSnake[0]].classList.add("snake");
 }
+
+function randomApple() {
+  do {
+    appleIndex = Math.floor(Math.random * squares.length);
+  } while (squares[appleIndex].classList.contains("snake"));
+  squares[appleIndex].classList.add("apple");
+}
+
+function control(e) {
+  squares[currentIndex].classList.remove("snake");
+
+  if (e.keyCode === 39) {
+    direction = 1;
+  } else if (e.keyCode === 38) {
+    direction = -width;
+  } else if (e.keyCode === 37) {
+    direction = -1;
+  } else if (e.keyCode === 40) {
+    direction = +width;
+  }
+
+  document.addEventListener("keyup", control);
+  startButton.addEventListener("click", startGame);
+}
