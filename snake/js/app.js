@@ -30,3 +30,35 @@ function startGame() {
   currentSnake.forEach((index) => squares[index].classList.add("snake"));
   interval = setInterval(movesOutcomes, intervalTime);
 }
+
+// function that deals with ALL the ove outcomes of the Snake
+function moveOutcomes() {
+  // deals with snake hitting border and snake hitting self
+  if (
+    (currentSnake[0] + width >= width * width && direction == width) ||
+    (currentSnake[0] % width === width - 1 && direction === 1) ||
+    (currentSnake[0] % width === 0 && direction === -width) ||
+    (currentSnake[0] - width < 0 && direction === -width) ||
+    squares[currentSnake[0] + direction].classList.contains("snake")
+  ) {
+    return clearInterval(interval);
+  }
+
+  const tail = currentSnake.pop();
+  squares[tail].classList.remove("snake");
+  currentSnake.unshift(currentSnake[0] + direction);
+
+  if (squares[currentSnake[0]].classList.contains("apple")) {
+    squares[currentSnake[0]].classList.remove("apple");
+    squares[tail].classList.add("snake");
+    currentSnake.push(tail);
+    randomApple();
+    score++;
+    scoreDisplay.textContent = score;
+    clearInterval(interval);
+    intervalTime = intervalTime * speed;
+    interval = setInterval(moveOutcomes, intervalTime);
+  }
+
+  squares[currentSnake[0]].classList.add("snake");
+}
