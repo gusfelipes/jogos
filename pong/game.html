@@ -1,208 +1,219 @@
-<html>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <script>
-    var canvas;
-    var canvasContext;
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../global/css/style.css" />
+    <title>Pong</title>
+  </head>
+  <body>
+    <div class="center">
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
+    <script>
+      var canvas;
+      var canvasContext;
 
-    var ballX = 50;
-    var ballY = 50;
+      var ballX = 50;
+      var ballY = 50;
 
-    var ballSpeedX = 10;
-    var ballSpeedY = 5;
+      var ballSpeedX = 10;
+      var ballSpeedY = 5;
 
-    var paddle1Y = 250;
-    var paddle2Y = 250;
+      var paddle1Y = 250;
+      var paddle2Y = 250;
 
-    var player1Score = 0;
-    var player2Score = 0;
+      var player1Score = 0;
+      var player2Score = 0;
 
-    var showingWinScreen = false;
+      var showingWinScreen = false;
 
-    const WINNING_SCORE = 3;
+      const WINNING_SCORE = 3;
 
-    const PADDLE_HEIGHT = 100;
-    const PADDLE_TICKNESS = 10;
+      const PADDLE_HEIGHT = 100;
+      const PADDLE_TICKNESS = 10;
 
-    function calculateMousePos(evt) {
-      var rect = canvas.getBoundingClientRect();
-      var root = document.documentElement;
-      var mouseX = evt.clientX - rect.left - root.scrollLeft;
-      var mouseY = evt.clientY - rect.top - root.scrollTop;
-      return { x: mouseX, y: mouseY };
-    }
-    // pode ser utilizado uma arraw function aqui
-    window.onload = function () {
-      canvas = document.getElementById("gameCanvas");
-      canvasContext = canvas.getContext("2d");
+      function calculateMousePos(evt) {
+        var rect = canvas.getBoundingClientRect();
+        var root = document.documentElement;
+        var mouseX = evt.clientX - rect.left - root.scrollLeft;
+        var mouseY = evt.clientY - rect.top - root.scrollTop;
+        return { x: mouseX, y: mouseY };
+      }
+      // pode ser utilizado uma arraw function aqui
+      window.onload = function () {
+        canvas = document.getElementById("gameCanvas");
+        canvasContext = canvas.getContext("2d");
 
-      var framePerSeconds = 30;
-      // abaixo para cada um segundo (milisegundos no parâmetro) a função vai ser executada
-      setInterval(function () {
+        var framePerSeconds = 30;
+        // abaixo para cada um segundo (milisegundos no parâmetro) a função vai ser executada
+        setInterval(function () {
+          moveEverything();
+          drawEverything();
+        }, 1000 / framePerSeconds);
+        // setInterval(callBoth, 1000 / framePerSeconds);
+
+        canvas.addEventListener("mousemove", function (evt) {
+          var mousePos = calculateMousePos(evt);
+          paddle1Y = mousePos.y - PADDLE_HEIGHT / 2;
+          // paddle2Y = mousePos.y - PADDLE_HEIGHT / 2;
+        });
+
+        canvas.addEventListener("mousedown", handleMouseClick);
+
+        function handleMouseClick(evt) {
+          if (showingWinScreen) {
+            player1Score = 0;
+            player2Score = 0;
+            showingWinScreen = false;
+          }
+        }
+      };
+
+      function callBoth() {
+        // ballReset();
         moveEverything();
         drawEverything();
-      }, 1000 / framePerSeconds);
-      // setInterval(callBoth, 1000 / framePerSeconds);
+      }
 
-      canvas.addEventListener("mousemove", function (evt) {
-        var mousePos = calculateMousePos(evt);
-        paddle1Y = mousePos.y - PADDLE_HEIGHT / 2;
-        // paddle2Y = mousePos.y - PADDLE_HEIGHT / 2;
-      });
+      function drawNet() {
+        for (i = 10; i < canvas.height; i += 40) {
+          colorRect(canvas.width / 2 - 1, i, 2, 20, "#FFF");
+        }
+      }
+      function drawEverything() {
+        // #000 Preto
+        // #FFF Branco
 
-      canvas.addEventListener("mousedown", handleMouseClick);
+        // abaixo função para fundo preto
+        colorRect(0, 0, canvas.width, canvas.height, "#000");
 
-      function handleMouseClick(evt) {
         if (showingWinScreen) {
-          player1Score = 0;
-          player2Score = 0;
-          showingWinScreen = false;
+          canvasContext.fillStyle = "#FFF";
+          if (player1Score >= WINNING_SCORE) {
+            canvasContext.fillText("Left player Win!!", 350, 200);
+          } else if (player2Score >= WINNING_SCORE) {
+            canvasContext.fillText("Right player Win!!", 350, 200);
+          }
+          canvasContext.fillText("Click to Continue", 350, 400);
+          return;
         }
+
+        drawNet();
+        // caixa branca pá (paddle) esquerdo (Jogador)
+        // 1 para não ficar coloca no lado esquerdo e direito da tela
+        colorRect(1, paddle1Y, PADDLE_TICKNESS, PADDLE_HEIGHT, "#FFF");
+
+        // paddle direto (computador)
+        colorRect(
+          canvas.width - 1 - PADDLE_TICKNESS,
+          paddle2Y,
+          PADDLE_TICKNESS,
+          PADDLE_HEIGHT,
+          "#FFF"
+        );
+
+        //caixa vermelha, para movimentação
+        // colorRect(ballX, ballY, 10, 10, "#F00");
+
+        // proxima linha desenha a bola
+        colorCircle(ballX, ballY, 5, "#FFF");
+
+        canvasContext.fillText("", canvas.width / 2, 50);
+        canvasContext.fillText(player1Score, 100, 100);
+        canvasContext.fillText(player2Score, canvas.width - 100, 100);
       }
-    };
 
-    function callBoth() {
-      // ballReset();
-      moveEverything();
-      drawEverything();
-    }
+      function colorCircle(centerX, centerY, radius, drawColor) {
+        // abaixo preenche a cor do circulo
+        canvasContext.fillStyle = drawColor;
 
-    function drawNet() {
-      for (i = 10; i < canvas.height; i += 40) {
-        colorRect(canvas.width / 2 - 1, i, 2, 20, "#FFF");
+        canvasContext.beginPath();
+
+        // desenha o circulo, com os parâmetros sendo na sequência
+        // posX, posY, raio, início do circulo (em radianos), final do circulo (em radianos) 360 = 2pi, anti-horário
+        canvasContext.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
+
+        canvasContext.fill();
       }
-    }
-    function drawEverything() {
-      // #000 Preto
-      // #FFF Branco
 
-      // abaixo função para fundo preto
-      colorRect(0, 0, canvas.width, canvas.height, "#000");
+      // função para desenhar caixas
+      function colorRect(leftX, topY, width, height, color) {
+        // abaixo escolhe o estilo do canvas, pode ser usado hexadecimal ou o nome da cor em inglês
+        canvasContext.fillStyle = color;
 
-      if (showingWinScreen) {
-        canvasContext.fillStyle = "#FFF";
-        if (player1Score >= WINNING_SCORE) {
-          canvasContext.fillText("Left player Win!!", 350, 200);
-        } else if (player2Score >= WINNING_SCORE) {
-          canvasContext.fillText("Right player Win!!", 350, 200);
+        // abaixo os dois primeiros parâmetros são para a posição inicial (horizontal, vertical)
+        // já os outros dois parâmetros são para o tamanho da caixa (largura, altura)
+        // para colocar a caixa de forma centralizado dentro de outra caixa, é necessário considerar reduzir metade do tamanho da primeira caixa em suas posições iniciais. Ex: para uma caixa de 100px diminuir 50px das posições
+        canvasContext.fillRect(leftX, topY, width, height);
+      }
+
+      function ballReset() {
+        if (player1Score >= WINNING_SCORE || player2Score >= WINNING_SCORE) {
+          showingWinScreen = true;
         }
-        canvasContext.fillText("Click to Continue", 350, 400);
-        return;
+
+        ballX = canvas.width / 2;
+        ballY = canvas.height / 2;
+        ballSpeedX = -ballSpeedX;
       }
 
-      drawNet();
-      // caixa branca pá (paddle) esquerdo (Jogador)
-      colorRect(0, paddle1Y, PADDLE_TICKNESS, PADDLE_HEIGHT, "#FFF");
-
-      // paddle direto (computador)
-      colorRect(
-        canvas.width - PADDLE_TICKNESS,
-        paddle2Y,
-        PADDLE_TICKNESS,
-        PADDLE_HEIGHT,
-        "#FFF"
-      );
-
-      //caixa vermelha, para movimentação
-      // colorRect(ballX, ballY, 10, 10, "#F00");
-
-      // proxima linha desenha a bola
-      colorCircle(ballX, ballY, 5, "#FFF");
-
-      canvasContext.fillText("", canvas.width / 2, 50);
-      canvasContext.fillText(player1Score, 100, 100);
-      canvasContext.fillText(player2Score, canvas.width - 100, 100);
-    }
-
-    function colorCircle(centerX, centerY, radius, drawColor) {
-      // abaixo preenche a cor do circulo
-      canvasContext.fillStyle = drawColor;
-
-      canvasContext.beginPath();
-
-      // desenha o circulo, com os parâmetros sendo na sequência
-      // posX, posY, raio, início do circulo (em radianos), final do circulo (em radianos) 360 = 2pi, anti-horário
-      canvasContext.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
-
-      canvasContext.fill();
-    }
-
-    // função para desenhar caixas
-    function colorRect(leftX, topY, width, height, color) {
-      // abaixo escolhe o estilo do canvas, pode ser usado hexadecimal ou o nome da cor em inglês
-      canvasContext.fillStyle = color;
-
-      // abaixo os dois primeiros parâmetros são para a posição inicial (horizontal, vertical)
-      // já os outros dois parâmetros são para o tamanho da caixa (largura, altura)
-      // para colocar a caixa de forma centralizado dentro de outra caixa, é necessário considerar reduzir metade do tamanho da primeira caixa em suas posições iniciais. Ex: para uma caixa de 100px diminuir 50px das posições
-      canvasContext.fillRect(leftX, topY, width, height);
-    }
-
-    function ballReset() {
-      if (player1Score >= WINNING_SCORE || player2Score >= WINNING_SCORE) {
-        showingWinScreen = true;
-      }
-
-      ballX = canvas.width / 2;
-      ballY = canvas.height / 2;
-      ballSpeedX = -ballSpeedX;
-    }
-
-    function computerMovement() {
-      // var paddle1YCenter = paddle1Y + PADDLE_HEIGHT / 2;
-      var paddle2YCenter = paddle2Y + PADDLE_HEIGHT / 2;
-      /*
+      function computerMovement() {
+        // var paddle1YCenter = paddle1Y + PADDLE_HEIGHT / 2;
+        var paddle2YCenter = paddle2Y + PADDLE_HEIGHT / 2;
+        /*
          if (paddle1YCenter < ballY - 35) {
            paddle1Y = paddle1Y + 6;
          } else if (paddle1YCenter > ballY + 35) {
            paddle1Y = paddle1Y - 6;
          }
     */
-      if (paddle2YCenter < ballY - 35) {
-        paddle2Y = paddle2Y + 6;
-      } else if (paddle2YCenter > ballY + 35) {
-        paddle2Y = paddle2Y - 6;
-      }
-    }
-
-    function moveEverything() {
-      if (showingWinScreen) {
-        return;
-      }
-
-      computerMovement(); // IA do oponente
-
-      // abaixo pode ser considerado a velocidade da bola no eixo X
-      ballX = ballX + ballSpeedX;
-      ballY = ballY + ballSpeedY;
-
-      if (ballX > canvas.width) {
-        if (ballY > paddle2Y && ballY < paddle2Y + PADDLE_HEIGHT) {
-          ballSpeedX = -ballSpeedX;
-          var deltaY = ballY - (paddle2Y + PADDLE_HEIGHT / 2);
-          ballSpeedY = deltaY * 0.35; // controle da bola par quando ela bater na borda da pá
-        } else {
-          player1Score = player1Score + 1;
-          ballReset();
-        }
-      }
-      if (ballX < 0) {
-        if (ballY > paddle1Y && ballY < paddle1Y + PADDLE_HEIGHT) {
-          ballSpeedX = -ballSpeedX;
-          var deltaY = ballY - (paddle1Y + PADDLE_HEIGHT / 2);
-          ballSpeedY = deltaY * 0.35; // controle da bola
-        } else {
-          player2Score = player2Score + 1;
-          ballReset();
-          1;
+        if (paddle2YCenter < ballY - 35) {
+          paddle2Y = paddle2Y + 6;
+        } else if (paddle2YCenter > ballY + 35) {
+          paddle2Y = paddle2Y - 6;
         }
       }
 
-      if (ballY > canvas.height) {
-        ballSpeedY = -ballSpeedY;
+      function moveEverything() {
+        if (showingWinScreen) {
+          return;
+        }
+
+        computerMovement(); // IA do oponente
+
+        // abaixo pode ser considerado a velocidade da bola no eixo X
+        ballX = ballX + ballSpeedX;
+        ballY = ballY + ballSpeedY;
+
+        if (ballX > canvas.width) {
+          if (ballY > paddle2Y && ballY < paddle2Y + PADDLE_HEIGHT) {
+            ballSpeedX = -ballSpeedX;
+            var deltaY = ballY - (paddle2Y + PADDLE_HEIGHT / 2);
+            ballSpeedY = deltaY * 0.35; // controle da bola par quando ela bater na borda da pá
+          } else {
+            player1Score = player1Score + 1;
+            ballReset();
+          }
+        }
+        if (ballX < 0) {
+          if (ballY > paddle1Y && ballY < paddle1Y + PADDLE_HEIGHT) {
+            ballSpeedX = -ballSpeedX;
+            var deltaY = ballY - (paddle1Y + PADDLE_HEIGHT / 2);
+            ballSpeedY = deltaY * 0.35; // controle da bola
+          } else {
+            player2Score = player2Score + 1;
+            ballReset();
+            1;
+          }
+        }
+
+        if (ballY > canvas.height) {
+          ballSpeedY = -ballSpeedY;
+        }
+        if (ballY < 0) {
+          ballSpeedY = -ballSpeedY;
+        }
       }
-      if (ballY < 0) {
-        ballSpeedY = -ballSpeedY;
-      }
-    }
-  </script>
+    </script>
+  </body>
 </html>
